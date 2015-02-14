@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+"""
+Scrape etiquette: http://meta.stackexchange.com/questions/443/etiquette-of-screen-scraping-stack-overflow
+
+ - Use GZIP requests
+ - Identify yourself using the user-agent using an URL
+ - Use JSON, RSS or an API when available
+ - Be considerate, If pulling data for more than every 15, ask permission
+
+"""
+
 
 import csv
 import time
@@ -10,6 +20,10 @@ from bs4 import BeautifulSoup
 
 PROJECT = 'http://techcrunch.com/'
 YEARS = range(2005, 2015)
+
+custom_headers = {'content-encoding': 'gzip', 
+                  'User-Agent': 'My User Agent 0.1',
+                  'From': 'thinkxl@gmail.com'}
 
 def get_years_available(url, year):
     """
@@ -25,15 +39,15 @@ def get_years_available(url, year):
 
         # ex: `http://techcrunch.com/2005/page/2`
         new_url = url + str(year) + '/page/' + str(count)
-        r = requests.get(new_url)
+        r = requests.get(new_url, headers=custom_headers)
         if r.status_code == 200:
             results.append(new_url)
 
-            # We add some sleep time to don't get mad the webmaster :)
-            # also we set a variable number between 0 and 5 seconds for look
-            # less like a bot.
+            # We add some sleep time to don't get mad the webmaster :) also
+            # we set a variable number between 0 and 5 seconds for look less
+            # like a bot.
             time.sleep(randint(0, 5))
-            get_list(count + 1)
+            populate_results(count + 1)
         else:
             pass 
 
@@ -50,7 +64,7 @@ def get_list_of_urls(project):
     print urls
 
 def get_content(url):
-   return BeautifulSoup(requests.get(url).text)
+   return BeautifulSoup(requests.get(url).text, headers=custom_headers)
    # return soup.find('div', class_='article-entry').find_all('p')
 
 def main():
